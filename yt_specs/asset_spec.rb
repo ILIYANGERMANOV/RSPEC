@@ -28,8 +28,6 @@ describe Yt::Asset do
 
 	describe '#update' do		
 		it do
-			allow(@myasset).to receive(:underscore_keys!)
-			allow(@myasset).to receive(:do_patch)
 			expect(@myasset).to receive(:underscore_keys!)
 			expect(@myasset).to receive(:do_patch)
 			expect(@myasset.update).to be true

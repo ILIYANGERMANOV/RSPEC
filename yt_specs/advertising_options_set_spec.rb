@@ -13,8 +13,6 @@ describe Yt::AdvertisingOptionsSet do
 
 	describe '#update' do
 		it do
-				allow(@myclass).to receive(:underscore_keys!)
-				allow(@myclass).to receive(:do_patch)
 				expect(@myclass).to receive(:underscore_keys!)
 				expect(@myclass).to receive(:do_patch)
 				expect(@myclass.update).to be true
