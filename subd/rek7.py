@@ -15,7 +15,7 @@ import random
 #!NOTE: make sure "1. Create the following tables" is on the first line of the file!!
 
 MYSQL_USERNAME = "root"
-MYSQL_PASSWORD = "xxxxxxxxxxxxxxxxxxxxxx"
+MYSQL_PASSWORD = "xxxxxxxxxxxxxxxx"
 DATABASE_NAME = 'exam'
 
 DIR_NAME = "Iliyan_Germanov_B_17/"
@@ -68,7 +68,7 @@ class Database:
 
 	def get_insert_records_query(self, database_cursor):
 		query = ""
-	
+
 		tables_copy = list(self.tables)
 
 		my_dependencies = {}
@@ -87,7 +87,15 @@ class Database:
 				except TypeError:
 					my_dependencies[table_key].append(dependencies)	
 
+		previous_insert_table_len = -1
+		force_break = False
 		while len(tables_copy) < len(self.tables):
+			print "Task 3: Looping dependencies for insert order: progress %d/%d" % (len(tables_copy), len(self.tables))
+			if previous_insert_table_len == len(tables_copy):
+				print "Task 3: Force breaking"
+				force_break = True
+				break
+			previous_insert_table_len = len(tables_copy)
 			for key, value in my_dependencies.iteritems():
 				if key in tables_copy:
 					break
@@ -95,13 +103,26 @@ class Database:
 				for table in value:
 					if table not in tables_copy:
 						is_ok = False
+						break
 				if is_ok:
 					tables_copy.append(key)
 
-		#print "insert order:"
-		#for table in tables_copy:
-		#	print table.table_name
-		#print "-----------------------------------"
+	
+		if force_break:
+			print "Task 3: Trying to resolving force breaking missing tables"
+			for table in self.tables:
+				if talbe not in tables_copy:
+					tables_copy.append(table)
+			if len(tables_copy) == len(self.tables):
+				print "Task	3: Missing tables resovled succesfully!"
+			else:
+				print "Task 3: failed to resolve missing tables."
+				print "Task 3: data inserted in tables:"
+				for table in tables_copy:
+					print table.table_name
+				print "---------------------------------------"
+
+		print "Task 3: Insert order table list created."
 
 		database_cursor.close()
 		for table in tables_copy:
