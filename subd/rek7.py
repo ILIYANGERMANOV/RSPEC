@@ -111,7 +111,7 @@ class Database:
 		if force_break:
 			print "Task 3: Trying to resolving force breaking missing tables"
 			for table in self.tables:
-				if talbe not in tables_copy:
+				if table not in tables_copy:
 					tables_copy.append(table)
 			if len(tables_copy) == len(self.tables):
 				print "Task	3: Missing tables resovled succesfully!"
