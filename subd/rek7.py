@@ -15,7 +15,7 @@ import random
 #!NOTE: make sure "1. Create the following tables" is on the first line of the file!!
 
 MYSQL_USERNAME = "root"
-MYSQL_PASSWORD = "xxxxxxxxxx"
+MYSQL_PASSWORD = "xxxxxxxxxxxxxxxxxxxxxx"
 DATABASE_NAME = 'exam'
 
 DIR_NAME = "Iliyan_Germanov_B_17/"
@@ -29,7 +29,7 @@ TASK_3_FILE_NAME = "inserts.sql"
 
 TASK_5_FILE_NAME = "database1.sql"
 
-RECORDS_TO_INSERT = 3
+RECORDS_TO_INSERT = 5
 
 def show_error_message_and_exit(message):
 	print message
@@ -98,6 +98,11 @@ class Database:
 				if is_ok:
 					tables_copy.append(key)
 
+		#print "insert order:"
+		#for table in tables_copy:
+		#	print table.table_name
+		#print "-----------------------------------"
+
 		database_cursor.close()
 		for table in tables_copy:
 			insert_query = table.get_insert_records_query()
@@ -157,10 +162,11 @@ class Connection:
 		return self.get_add_column_as_foreign_key_query(True, self.first_table, self.second_table)
 
 	def create_one_to_many(self):
-		return self.get_add_column_as_foreign_key_query(False, self.first_table, self.second_table)
+		return self.get_add_column_as_foreign_key_query(False, self.second_table, self.first_table)
+
 
 	def create_many_to_one(self):
-		return self.get_add_column_as_foreign_key_query(False, self.second_table, self.first_table)
+		return self.get_add_column_as_foreign_key_query(False, self.first_table, self.second_table)
 
 	def create_many_to_many(self, database):
 		first_connect_column = self.get_connect_column_name(self.first_table.table_name);
@@ -168,8 +174,8 @@ class Connection:
 
 		table = Table(self.first_table.table_name + "_" + self.second_table.table_name, is_connection_table = True)
 
-		table.add_column(Column(first_connect_column, "int", True))
-		table.add_column(Column(second_connect_column, "int", True))
+		table.add_column(Column(first_connect_column, "int not null", True))
+		table.add_column(Column(second_connect_column, "int not null", True))
 		self.many_to_many_table = table
 		database.add_table(table)		
 		
@@ -182,9 +188,9 @@ class Connection:
 		if self.connection_type == "one to one":
 			return {self.first_table : self.second_table}
 		elif self.connection_type == "one to many":
-			return {self.first_table : self.second_table}
-		elif self.connection_type == "many to one":
 			return {self.second_table : self.first_table}
+		elif self.connection_type == "many to one":
+			return {self.first_table : self.second_table}
 		elif self.connection_type == "many to many":
 			return {self.many_to_many_table : [self.first_table, self.second_table]}
 		else:
@@ -294,6 +300,8 @@ class Column:
 			self.column_type = "VARCHAR(6)"
 		elif self.column_type == "int":
 			self.column_type = "INT"
+		elif self.column_type == "int not null":
+			self.column_type = "INT NOT NULL"
 		elif self.column_type == "varchar(16)":
 			self.column_type = "VARCHAR(16)"
 		elif self.column_type == "float":
@@ -312,6 +320,8 @@ class Column:
 	def get_value(self, current_id = 1):
 		if self.column_name == "gender":
 			return "'male'" if random.randint(1,10) % 2 else "'female'"
+		elif self.column_name == "picture_url":
+			return "'http://pics.com/my_pic'"
 		elif self.is_foreign_key:
 			return "%d" % current_id
 		elif self.column_type == "VARCHAR(255)":
@@ -321,7 +331,7 @@ class Column:
 		elif self.column_type == "FLOAT":
 			return "%d" % random.uniform(13.12, 100)
 		elif self.column_type == "TEXT":
-			return "'Tova e text'"
+			return "'This is placeholder text: bla bla bla bla...'"
 		elif self.column_type == "BOOLEAN":
 			return "TRUE" if random.randint(1,10) % 2 else "FALSE"
 		elif self.column_type == "DOUBLE":
@@ -331,9 +341,9 @@ class Column:
 		elif self.column_type == "VARCHAR(6)":
 			return "'ABCDEF'"
 		elif self.column_type == "VARCHAR(16)":
-			return "'ABCEDFGHIJK'"
+			return "'c8b1a9953c461129'"
 		elif self.column_type == "id":
-			print "Trying to get value of id!"
+			print "Warning: Trying to get value of id!"
 		else:
 			print "Unknown type - %s" % self.column_type
 
@@ -422,15 +432,11 @@ def complete_task_5(content, database_cursor, database):
 #TASK 5-------------------------------------------------------------------------------------------------------------
 
 def parse_exam_file_content(content, database_cursor):
-	try:
-		database = Database(DATABASE_NAME)
-		complete_task_1(content, database_cursor, database)
-		complete_task_2(content, database_cursor, database)
-		complete_task_3(content, database_cursor, database)
-		complete_task_5(content, database_cursor, database)
-	except:
-		show_error_message_and_exit("Fatal error while parsing exam file!")
-	return
+	database = Database(DATABASE_NAME)
+	complete_task_1(content, database_cursor, database)
+	complete_task_2(content, database_cursor, database)
+	complete_task_3(content, database_cursor, database)
+	complete_task_5(content, database_cursor, database)
 
 
 #main
@@ -467,7 +473,7 @@ try:
 	#read_file ok
 	print "File '%s' read successfully!" % exam_file_path
 	parse_exam_file_content(content, cursor)
-except:
+except (OSError, IOError) as e:
 	show_error_message_and_exit("Fata error: Cannot open file '%s'." % exam_file_path)
 
 cursor.close()
